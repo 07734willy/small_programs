@@ -1,0 +1,86 @@
+from random import random
+from random import randrange
+from time import time
+
+def randint(max_val):
+	return int(random() * max_val)
+
+#target_list = [4, 7, None, 8, 2, None, 90, None, None, 12, 34, 12]
+test_size  = 100000
+test_ratio = 10000
+test_val = 0.999
+target_list = [1 if randint(test_ratio) > 1 else None for _ in range(test_size)]
+
+
+values = [7777] * int(target_list.count(None) * test_val)
+
+#values = [3333, 4444, 5555]
+#target_list = [4, 7, None, 8, 2, None, 90, None, None, 12, 34, 12]
+
+def assign(values, target):
+	output = []
+	mapping = dict()
+	mmax = 0
+	size = len(target)
+	for val in values:
+		idx = randint(size)
+		while target[idx] != None:
+			if idx in mapping:
+				idx = mapping.pop(idx)
+				mmax = max(mapping or [0])
+				break
+
+			min_size = max(idx, mmax)
+			#while (idx < size-1) and (target[size-1] != None) and (size-1 not in mapping.keys()):
+			#while (min_size < size -1) and (target[size-1] != None):
+			#	size -= 1
+			
+			
+			try:
+				size -= target[size-1:min_size:-1].index(None)
+			except:
+				size = min_size + 1
+
+			"""
+			old_size = size
+			size = min_size + 1
+			for sz in range(old_size-1,min_size,-1):
+				if target[sz] == None:
+					size = sz + 1
+					break
+			"""
+
+			if target[size-1] == None:
+				size -= 1
+				mapping[idx] = size
+				if idx > mmax:
+					mmax = idx
+			elif size-1 in mapping:
+				size -= 1
+				mapping[idx] = mapping.pop(size)
+				mmax = max(mapping or [0])
+
+			idx = randint(size)
+		target[idx] = val
+		output.append(idx)
+	return output
+
+def naive(values, target):
+	output = []
+	for val in values:
+		while True:
+			addr = randrange(0, len(target))
+			if target[addr] == None:
+				output.append(addr)
+				target[addr] = val
+				break
+	return output
+				
+start = time()
+v1 = naive(values, list(target_list))
+print(time()-start)
+start = time()
+v2 = assign(values, list(target_list))
+print(time()-start)
+
+#print(v1, v2)

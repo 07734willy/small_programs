@@ -33,6 +33,12 @@ class Edge:
     def get_left(self):
         return self.left[self.lidx][0]
 
+    def __str__(self):
+        return "Edge(l:{}, r:{}, w:{})".format(self.left[self.lidx][0], self.right[self.ridx], self.weight)
+
+    def __rep__(self):
+        return str(self)
+
 # Find the min distance to each rock in `j`
 # :left_rocks:  [(rock_row, weight), ...]
 # :right_rocks: [rock_row, ...]
@@ -45,13 +51,19 @@ def min_jump(left_rocks, right_rocks):
         ridx = bisect_right(right_rocks, lidx)
         
         # If these edges land within valid intervals, add them
+        if 0 <= ridx - 1 < len(right_rocks):
+            heappush(heap, Edge(lidx, ridx-1,   left_rocks, right_rocks))
         if 0 <= ridx < len(right_rocks):
-            heappush(heap, Edge(lidx, ridx,   left_rocks, right_rocks))
-        if 0 <= ridx + 1 < len(right_rocks):
-            heappush(heap, Edge(lidx, ridx+1, left_rocks, right_rocks))
+            heappush(heap, Edge(lidx, ridx, left_rocks, right_rocks))
 
     unvisited = set(right_rocks)
     shortest = dict()
+
+    print("-"*10)
+    for edge in heap:
+        print(str(edge))
+
+    print("-"*10)
 
     # Find the shortest path to each `j` rock
     while unvisited:
@@ -74,18 +86,19 @@ def min_jump(left_rocks, right_rocks):
                 heappush(heap, next_edge)
     return shortest
 
-from random import randint
+from random import randint, seed
 if __name__ == "__main__":
     #left = [(1,2),(4,39)]
     #right = [7,8,9]
     #print(min_jump(left, right))
+    seed(2)
     size = 10
     last = list(zip(set(randint(0,size) for _ in range(size)), list(randint(1, size) for _ in range(size))))
-
+    print(last)
     for row_num in range(size):
         next_col = list(set(randint(0, size) for _ in range(size)))
         print(last[:10])
         print(next_col[:10])
         new = min_jump(last, next_col)
-        last = zip(new.items())
+        last = list(new.items())
 
